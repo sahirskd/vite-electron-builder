@@ -294,11 +294,6 @@ npm run init
 ```
 Set up the initial environment by creating a new renderer, integrating it, and installing the necessary packages.
 
-## Contribution
-
-See [Contributing Guide](CONTRIBUTING.md).
-
-
 [vite]: https://github.com/vitejs/vite/
 
 [electron]: https://github.com/electron/electron
