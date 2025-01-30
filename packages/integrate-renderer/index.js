@@ -1,4 +1,4 @@
-import pkgJson from '../renderer/package.json' with {type: 'json'};
+import pkgJson from '../renderer/package.json' assert {type: 'json'};
 import * as fs from 'node:fs';
 
 

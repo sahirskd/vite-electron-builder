@@ -1,10 +1,10 @@
-import pkg from './package.json' with {type: 'json'};
+// electron-builder.mjs
+import pkg from './package.json' assert {type: 'json'};
 import mapWorkspaces from '@npmcli/map-workspaces';
 import {join} from 'node:path';
 import {pathToFileURL} from 'node:url';
 
-export default /** @type import('electron-builder').Configuration */
-({
+const config = {
   directories: {
     output: 'dist',
     buildResources: 'buildResources',
@@ -13,23 +13,22 @@ export default /** @type import('electron-builder').Configuration */
   linux: {
     target: ['deb'],
   },
-  /**
-   * It is recommended to avoid using non-standard characters such as spaces in artifact names,
-   * as they can unpredictably change during deployment, making them impossible to locate and download for update.
-   */
   artifactName: '${productName}-${version}-${os}-${arch}.${ext}',
   files: [
     'LICENSE*',
     'packages/entry-point.js',
-    '!node_modules/@vite-electron-builder/**',
-    ...await getListOfFilesFromEachWorkspace(),
-  ],
-});
+    '!node_modules/@vite-electron-builder/**'
+  ]
+};
+
+// Get workspace files list
+const workspaceFiles = await getListOfFilesFromEachWorkspace();
+config.files.push(...workspaceFiles);
 
 /**
  * By default, electron-builder copies each package into the output compilation entirety,
  * including the source code, tests, configuration, assets, and any other files.
- *
+ *  *
  * So you may get compiled app structure like this:
  * ```
  * app/
@@ -85,10 +84,6 @@ export default /** @type import('electron-builder').Configuration */
  * ```
  */
 async function getListOfFilesFromEachWorkspace() {
-
-  /**
-   * @type {Map<string, string>}
-   */
   const workspaces = await mapWorkspaces({
     cwd: process.cwd(),
     pkg,
@@ -98,13 +93,14 @@ async function getListOfFilesFromEachWorkspace() {
 
   for (const [name, path] of workspaces) {
     const pkgPath = join(path, 'package.json');
-    const {default: workspacePkg} = await import(pathToFileURL(pkgPath), {with: {type: 'json'}});
+    const {default: workspacePkg} = await import(pathToFileURL(pkgPath), {assert: {type: 'json'}});
 
     let patterns = workspacePkg.files || ['dist/**', 'package.json'];
-
     patterns = patterns.map(p => join('node_modules', name, p));
     allFilesToInclude.push(...patterns);
   }
 
   return allFilesToInclude;
 }
+
+export default config;
